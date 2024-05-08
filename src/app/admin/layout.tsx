@@ -11,7 +11,7 @@ export default function AdminLayout({
     <>
       <Header>
         <NavLink href="/admin">Dashboard</NavLink>
-        <NavLink href="/admin/products">Prodcuts</NavLink>
+        <NavLink href="/admin/products">Products</NavLink>
         <NavLink href="/admin/users">Users</NavLink>
         <NavLink href="/admin/orders">Orders</NavLink>
       </Header>
