@@ -8,7 +8,7 @@ import { notFound, redirect } from 'next/navigation'
 const fileSchema = z.instanceof(File, {message: 'required'})
 const imageSchema = fileSchema.refine(file => file.size === 0 || file.type.startsWith('image/'))
 
-const addScehma = z.object({
+const addSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
   priceInCents: z.coerce.number().int().min(1),
@@ -16,7 +16,7 @@ const addScehma = z.object({
 })
 
 export async function addProduct(prevState: unknown, formData: FormData) {
-  const result = addScehma.safeParse(Object.fromEntries(formData.entries()))
+  const result = addSchema.safeParse(Object.fromEntries(formData.entries()))
   
   if(result.success === false) {
     return result.error.formErrors.fieldErrors
@@ -54,4 +54,45 @@ export async function deleteProduct(id: string) {
   if (product === null) return notFound()
 
   await fs.unlink(`public${product.imagePath}`)
+}
+
+const editSchema = addSchema.extend ({
+  iamge: imageSchema.optional()
+})
+
+export async function updateProduct(id: string, prevState: unknown, formData: FormData) {
+  const result = editSchema.safeParse(Object.fromEntries(formData.entries()))
+  
+  if(result.success === false) {
+    return result.error.formErrors.fieldErrors
+  }
+
+  const data = result.data
+  const product = await db.product.findUnique({
+    where: {
+      id
+    }
+  })
+  
+  let imagePath = product?.imagePath
+  if (data.image != null && data.image.size > 0) {
+    await fs.unlink( `product${product?.imagePath}`)
+    imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
+    await fs.writeFile(
+      `public${imagePath}`,
+      Buffer.from(await data.image.arrayBuffer())
+    )
+  }
+
+
+  await db.product.update({
+    where: {id},
+    data: {
+      name: data.name,
+      description: data.description,
+      priceInCents: data.priceInCents,
+      imagePath
+    }
+  })
+  redirect('/admin/products')
 }
