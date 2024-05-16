@@ -9,6 +9,7 @@ const fileSchema = z.instanceof(File, {message: 'required'})
 const imageSchema = fileSchema.refine(file => file.size === 0 || file.type.startsWith('image/'))
 
 const addSchema = z.object({
+  category: z.string().min(1),
   name: z.string().min(1),
   description: z.string().min(1),
   priceInCents: z.coerce.number().int().min(1),
@@ -16,13 +17,18 @@ const addSchema = z.object({
 })
 
 export async function addProduct(prevState: unknown, formData: FormData) {
+  // console.log(formData)
   const result = addSchema.safeParse(Object.fromEntries(formData.entries()))
-  
+  console.log('results:')
+  console.log(result)
+
   if(result.success === false) {
     return result.error.formErrors.fieldErrors
   }
 
   const data = result.data
+  console.log("data: ")
+  console.log(data)
 
   await fs.mkdir("public/products", { recursive: true })
   const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
@@ -34,6 +40,7 @@ export async function addProduct(prevState: unknown, formData: FormData) {
   await db.product.create({
     data: {
       isAvailable: false,
+      category: data.category,
       name: data.name,
       description: data.description,
       priceInCents: data.priceInCents,

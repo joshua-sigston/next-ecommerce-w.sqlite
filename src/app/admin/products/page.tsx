@@ -8,6 +8,7 @@ export default async function AdminProductsPage() {
   const products = await db.product.findMany({
     select: {
       id: true,
+      category: true,
       name: true,
       priceInCents: true,
       isAvailable: true,
@@ -15,7 +16,6 @@ export default async function AdminProductsPage() {
     },
     orderBy: { name: 'asc' },
   });
-  console.log(products);
 
   return (
     <>

@@ -26,7 +26,7 @@ interface Props {
 
 export default function ProductsTable({ products }: any) {
   if (products.length === 0) return <p>No Products.</p>;
-
+  console.log(products);
   return (
     <Table>
       <TableHeader>
@@ -35,6 +35,7 @@ export default function ProductsTable({ products }: any) {
             <span className="sr-only">Available for Purchase</span>
           </TableHead>
           <TableHead>Name</TableHead>
+          <TableHead>Category</TableHead>
           <TableHead>Price</TableHead>
           <TableHead>Orders</TableHead>
           <TableHead className="w-8">
@@ -58,8 +59,10 @@ export default function ProductsTable({ products }: any) {
                 </>
               )}
             </TableCell>
+            <TableCell>{product.name}</TableCell>
+            <TableCell>{product.category}</TableCell>
             <TableCell>{formatCurrency(product.priceInCents / 100)}</TableCell>
-            <TableCell>{formatNumber(product._count.orders)}</TableCell>
+            <TableCell>{product._count.orders}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger>
